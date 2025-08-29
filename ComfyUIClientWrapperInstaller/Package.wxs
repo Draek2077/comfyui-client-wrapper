@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+    <Package Name="ComfyUI Client Wrapper"
+             Manufacturer="Draekz"
+             Version="1.0.0.0"
+             UpgradeCode="08f8d139-35b0-48b8-bd51-ddb511922375">
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <MediaTemplate EmbedCab="yes" />
+
+        <StandardDirectory Id="ProgramFiles64Folder">
+            <Directory Id="INSTALLFOLDER" Name="!(bind.property.Manufacturer)\!(bind.property.ProductName)" />
+        </StandardDirectory>
+
+        <Feature Id="Main" Title="Main Feature" Level="1">
+            <ComponentGroupRef Id="ProductComponents" />
+            <ComponentGroupRef Id="Shortcuts" />
+        </Feature>
+    </Package>
+
+    <Fragment>
+        <!-- 
+          This ComponentGroup now defines all the necessary files from your publish directory.
+        -->
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+            <!-- Main Executable -->
+            <Component Id="MainExecutable" Guid="*" Bitness="always64">
+                <File Id="ComfyUIClientWrapper.exe"
+                      Name="ComfyUIClientWrapper.exe"
+                      Source="publish\ComfyUIClientWrapper.exe"
+                      KeyPath="yes" />
+            </Component>
+
+            <!-- PDB File -->
+            <Component Id="ComfyUIClientWrapper.pdb" Guid="*">
+                <File Source="publish\ComfyUIClientWrapper.pdb" />
+            </Component>
+
+            <!-- Required DLLs -->
+            <Component Id="D3DCompiler_47_cor3.dll" Guid="*">
+                <File Source="publish\D3DCompiler_47_cor3.dll" />
+            </Component>
+            <Component Id="PenImc_cor3.dll" Guid="*">
+                <File Source="publish\PenImc_cor3.dll" />
+            </Component>
+            <Component Id="PresentationNative_cor3.dll" Guid="*">
+                <File Source="publish\PresentationNative_cor3.dll" />
+            </Component>
+            <Component Id="vcruntime140_cor3.dll" Guid="*">
+                <File Source="publish\vcruntime140_cor3.dll" />
+            </Component>
+            <Component Id="WebView2Loader.dll" Guid="*">
+                <File Source="publish\WebView2Loader.dll" />
+            </Component>
+            <Component Id="wpfgfx_cor3.dll" Guid="*">
+                <File Source="publish\wpfgfx_cor3.dll" />
+            </Component>
+
+            <!-- WebView2 XML Documentation Files -->
+            <Component Id="Microsoft.Web.WebView2.Core.xml" Guid="*">
+                <File Source="publish\Microsoft.Web.WebView2.Core.xml" />
+            </Component>
+            <Component Id="Microsoft.Web.WebView2.WinForms.xml" Guid="*">
+                <File Source="publish\Microsoft.Web.WebView2.WinForms.xml" />
+            </Component>
+            <Component Id="Microsoft.Web.WebView2.Wpf.xml" Guid="*">
+                <File Source="publish\Microsoft.Web.WebView2.Wpf.xml" />
+            </Component>
+        </ComponentGroup>
+
+        <ComponentGroup Id="Shortcuts" Directory="ProgramMenuFolder">
+            <Component Id="StartMenuShortcut" Guid="*">
+                <Shortcut Id="StartMenuShortcut"
+                          Name="ComfyUI Client Wrapper"
+                          Description="A wrapper application to manage ComfyUI web clients."
+                          Target="[#ComfyUIClientWrapper.exe]"
+                          WorkingDirectory="INSTALLFOLDER"/>
+                <RemoveFolder Id="RemoveStartMenuFolder" On="uninstall"/>
+                <RegistryValue Root="HKCU" Key="Software\!(bind.property.Manufacturer)\!(bind.property.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+            </Component>
+        </ComponentGroup>
+    </Fragment>
+</Wix>

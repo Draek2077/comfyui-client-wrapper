@@ -1,0 +1,6 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" platform="Any CPU" produce_single_file="true" self_contained="true" target_folder="$PROJECT_DIR$/ComfyUIClientWrapper/bin/Release/net8.0-windows/win-x64/publish" target_framework="net8.0-windows" uuid_high="1650756171637802946" uuid_low="-5847261412447113949" />
+    <method v="2" />
+  </configuration>
+</component>

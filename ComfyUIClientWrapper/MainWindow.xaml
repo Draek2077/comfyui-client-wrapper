@@ -1,0 +1,196 @@
+﻿<Window x:Class="ComfyUIClientWrapper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="ComfyUI Client" Height="800" Width="1280"
+        Loaded="MainWindow_Loaded"
+        KeyDown="Window_KeyDown"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <!-- Style for the small 'x' button on each tab header -->
+        <Style TargetType="Button" x:Key="TabCloseButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Padding" Value="5, 5, 5, 7"/>
+            <Setter Property="Width" Value="15"/>
+            <Setter Property="Height" Value="15"/>
+            <Setter Property="Margin" Value="5,0,0,-2"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                            <TextBlock Text="✕" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- Style for the main '+' and 'Settings' buttons -->
+        <Style TargetType="Button" x:Key="TopBarButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Margin" Value="2, 2, 2, 2" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="17">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource ButtonPressedBackgroundBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- The new, improved style for TabItem that emulates Edge -->
+        <Style TargetType="{x:Type TabItem}">
+            <Setter Property="Padding" Value="8,6,8,12" />
+            <Setter Property="Margin" Value="0,0,0,-2" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Grid x:Name="templateRoot" SnapsToDevicePixels="true" ZIndex="0" Margin="0, 0, 0, -2">
+                            <Border x:Name="mainBorder"
+                                    Background="{DynamicResource TabUnselectedBackgroundBrush}"
+                                    BorderBrush="{DynamicResource TabBorderBrush}"
+                                    BorderThickness="1,1,1,2"
+                                    CornerRadius="6,6,0,0">
+                                <ContentPresenter x:Name="contentPresenter"
+                                                  ContentSource="Header"
+                                                  Focusable="False"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}" />
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="mainBorder" Property="Background"
+                                        Value="{DynamicResource TabHoverBackgroundBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Panel.ZIndex" Value="1" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                                <Setter TargetName="mainBorder" Property="Background"
+                                        Value="{DynamicResource TabSelectedBackgroundBrush}" />
+                                <!-- Key Fix: Remove the bottom border and add a negative margin to cover the main border -->
+                                <Setter TargetName="mainBorder" Property="BorderThickness" Value="1,1,1,0" />
+                                <Setter TargetName="templateRoot" Property="Margin" Value="0,0,0,-2" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Style to remove the default TabControl border -->
+        <Style TargetType="{x:Type TabControl}">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0, 0, 0, 0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid KeyboardNavigation.TabNavigation="Local">
+                            <TabPanel x:Name="HeaderPanel" IsItemsHost="true" Margin="1,0,0,0" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="39" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Bar Area (Tabs and Buttons) -->
+        <Border Grid.Row="0" Background="{DynamicResource WindowBackgroundBrush}"
+                BorderBrush="{DynamicResource TabBorderBrush}" BorderThickness="0,2,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TabControl Grid.Column="0" Name="TabControl" Padding="0" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                    <Button Name="RefreshButton" Click="RefreshButton_Click" Style="{StaticResource TopBarButton}">
+                        <TextBlock Text="⟳" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Margin="0,0,0,4" />
+                    </Button>
+                    <Button Name="addTabButton" Click="AddTabButton_Click" Style="{StaticResource TopBarButton}">
+                        <TextBlock Text="+" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Margin="0,0,0,4" />
+                    </Button>
+                    <Button Name="fullscreenButton" Click="FullscreenButton_Click"
+                            Style="{StaticResource TopBarButton}">
+                        <TextBlock Text="⛶" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Margin="0,0,0,2" />
+                    </Button>
+                    <Button Name="settingsButton" Click="SettingsButton_Click" Style="{StaticResource TopBarButton}">
+                        <Button.Content>
+                            <TextBlock Text="⋯" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       HorizontalAlignment="Center" Margin="0,0,0,4" />
+                        </Button.Content>
+                        <Button.ContextMenu>
+                            <ContextMenu Placement="Left">
+                                <MenuItem Header="Close other tabs" Click="CloseOtherTabs_Click" />
+                                <Separator />
+                                <MenuItem Header="Theme">
+                                    <MenuItem Header="System Detected" Click="ThemeMenuItem_Click"
+                                              Tag="System Detected" />
+                                    <Separator />
+                                    <MenuItem Header="Light" Click="ThemeMenuItem_Click" Tag="LightTheme" />
+                                    <MenuItem Header="Dark" Click="ThemeMenuItem_Click" Tag="DarkTheme" />
+                                    <Separator />
+                                    <MenuItem Header="Solarized" Click="ThemeMenuItem_Click" Tag="SolarizedTheme" />
+                                    <MenuItem Header="Arc" Click="ThemeMenuItem_Click" Tag="ArcTheme" />
+                                    <MenuItem Header="Nord" Click="ThemeMenuItem_Click" Tag="NordTheme" />
+                                    <MenuItem Header="GitHub" Click="ThemeMenuItem_Click" Tag="GitHubTheme" />
+                                    <MenuItem Header="Obsidian" Click="ThemeMenuItem_Click" Tag="ObsidianTheme" />
+                                    <MenuItem Header="Milk White" Click="ThemeMenuItem_Click" Tag="MilkWhiteTheme" />
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="Exit" Click="Exit_Click" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Border Grid.Row="1" Background="{DynamicResource TabSelectedBackgroundBrush}">
+            <ContentPresenter x:Name="MainContentPresenter" />
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,38 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Primary Colors -->
+    <Color x:Key="WindowBackgroundColor">#FF2F3443</Color>
+    <Color x:Key="TextColor">#FFD3DAE3</Color>
+    <Color x:Key="MutedTextColor">#FF788094</Color>
+
+    <!-- Tab Colors -->
+    <Color x:Key="TabSelectedBackgroundColor">#FF242730</Color>
+    <Color x:Key="TabUnselectedBackgroundColor">#FF2F3443</Color>
+    <Color x:Key="TabHoverBackgroundColor">#FF404552</Color>
+    <Color x:Key="TabBorderColor">#FF2F3443</Color>
+
+    <!-- Button Colors -->
+    <Color x:Key="ButtonHoverBackgroundColor">#FF4F5564</Color>
+    <Color x:Key="ButtonPressedBackgroundColor">#FF5C6374</Color>
+
+    <!-- WebView Background -->
+    <Color x:Key="WebViewBackgroundColor">#FF242730</Color>
+
+
+    <!-- Brushes using the defined colors -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}" />
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="{StaticResource MutedTextColor}" />
+
+    <SolidColorBrush x:Key="TabSelectedBackgroundBrush" Color="{StaticResource TabSelectedBackgroundColor}" />
+    <SolidColorBrush x:Key="TabUnselectedBackgroundBrush" Color="{StaticResource TabUnselectedBackgroundColor}" />
+    <SolidColorBrush x:Key="TabHoverBackgroundBrush" Color="{StaticResource TabHoverBackgroundColor}" />
+    <SolidColorBrush x:Key="TabBorderBrush" Color="{StaticResource TabBorderColor}" />
+
+    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="{StaticResource ButtonHoverBackgroundColor}" />
+    <SolidColorBrush x:Key="ButtonPressedBackgroundBrush" Color="{StaticResource ButtonPressedBackgroundColor}" />
+
+    <SolidColorBrush x:Key="WebViewBackgroundBrush" Color="{StaticResource WebViewBackgroundColor}" />
+
+</ResourceDictionary>

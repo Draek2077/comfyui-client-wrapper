@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <StartupObject>ComfyUIClientWrapper.App</StartupObject>
+        <ApplicationIcon>Comfy_Client.ico</ApplicationIcon>
+        <LangVersion>12</LangVersion>
+        <PublishSingleFile>true</PublishSingleFile>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <SelfContained>true</SelfContained>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+        <PublishOnBuild>true</PublishOnBuild>
+        <Title>ComfyUI Client Wrapper</Title>
+        <Description>A wrapper for ComfyUI to manage multiple clients.</Description>
+        <RepositoryUrl>https://github.com/Draek2077/comfyui-client-wrapper.git</RepositoryUrl>
+        <Authors>Draekz</Authors>
+        <Company>Draekz</Company>
+
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="Comfy_Client.ico"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3405.78"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Page Update="SolarizedTheme.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+    </ItemGroup>
+
+</Project>
