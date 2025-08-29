@@ -44,6 +44,11 @@ namespace ComfyUIClientWrapper
                 _storedWindowState = WindowState;
                 _storedWindowStyle = WindowStyle;
 
+                if (WindowState == WindowState.Maximized)
+                {
+                    WindowState = WindowState.Normal;
+                }
+                
                 WindowStyle = WindowStyle.None;
                 // We set WindowState to Maximized to fill the screen, not Normal.
                 WindowState = WindowState.Maximized;
