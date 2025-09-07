@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -35,21 +36,6 @@ namespace ComfyUIClientWrapper
             TabControl.SelectionChanged += TabControl_SelectionChanged;
         }
         
-        private string GetProgressStringFromTitle(string title)
-        {
-            if (string.IsNullOrEmpty(title)) return string.Empty;
-
-            MatchCollection matches = Regex.Matches(title, @"\[(\d+)%\]");
-
-            if (matches.Count > 0)
-            {
-                // Return the last match, formatted as "[XX%]"
-                return matches.Last().Value;
-            }
-
-            return string.Empty;
-        }
-
         private void ToggleFullscreen()
         {
             if (!_isFullscreen)
@@ -253,35 +239,39 @@ namespace ComfyUIClientWrapper
             }
         }
 
-        private void UpdateTaskbarProgressFromTitle(string title)
+        // 1. ADDED: The new, single source of truth for progress logic.
+        private Match? GetPrioritizedProgressMatch(string title)
         {
-            if (string.IsNullOrEmpty(title))
-            {
-                TaskBarItemInfo.ProgressState = TaskbarItemProgressState.None;
-                return;
-            }
-
-            // Use Regex.Matches to find ALL occurrences of "[percentage]" in the title.
-            // The regex looks for a literal '[', captures one or more digits, then a '%' and a ']'.
+            if (string.IsNullOrEmpty(title)) return null;
+    
             var matches = Regex.Matches(title, @"\[(\d+)%\]");
 
-            if (matches.Count > 0)
-            {
-                // Get the very last match from the collection.
-                // This prioritizes the subtask (e.g., [10%]) if it exists.
-                var lastMatch = matches.Last();
+            // Find the last match that is not "[0%]"
+            return matches.LastOrDefault(m => m.Value != "[0%]");
+        }
         
-                // The captured digits are in Group 1.
-                if (!int.TryParse(lastMatch.Groups[1].Value, out var percentage))
-                    return;
-                
-                // Update the taskbar progress with the prioritized percentage
+        private string GetProgressStringFromTitle(string title)
+        {
+            var match = GetPrioritizedProgressMatch(title);
+    
+            // Return the match's formatted value (e.g., "[55%]") or an empty string.
+            return match?.Value ?? string.Empty;
+        }
+        
+        private void UpdateTaskbarProgressFromTitle(string title)
+        {
+            var match = GetPrioritizedProgressMatch(title);
+
+            // If a valid match was found and we can parse its number...
+            if (match != null && int.TryParse(match.Groups[1].Value, out int percentage))
+            {
+                // ...update the taskbar progress.
                 TaskBarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
                 TaskBarItemInfo.ProgressValue = percentage / 100.0;
             }
             else
             {
-                // If no percentage is found in the title, reset the taskbar progress.
+                // ...otherwise, reset the progress.
                 TaskBarItemInfo.ProgressState = TaskbarItemProgressState.None;
             }
         }
