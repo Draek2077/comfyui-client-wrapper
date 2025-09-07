@@ -27,6 +27,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="GitVersion.MsBuild" Version="6.4.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3405.78"/>
     </ItemGroup>
 
@@ -37,5 +41,7 @@
             <SubType>Designer</SubType>
         </Page>
     </ItemGroup>
-
+    <Target Name="WriteVersionToFile" AfterTargets="CoreCompile">
+        <WriteLinesToFile File="$(ProjectDir)version.txt" Lines="$(Version)" Overwrite="true" />
+    </Target>
 </Project>

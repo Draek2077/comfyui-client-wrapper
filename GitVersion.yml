@@ -1,0 +1,12 @@
+# This tells GitVersion to create a new version for every commit.
+mode: ContinuousDeployment
+
+# Use this as the base for the next version until a tag is created.
+next-version: 1.0
+
+branches:
+  main:
+    # For the 'main' branch, increment the patch version for each commit.
+    increment: Patch
+    # This ensures versions on 'main' are treated as stable releases (e.g., 1.1.0, not 1.1.0-alpha.1)
+    is-release-branch: true

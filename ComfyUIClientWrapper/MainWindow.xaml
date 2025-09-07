@@ -167,7 +167,9 @@
                         </Button.Content>
                         <Button.ContextMenu>
                             <ContextMenu Placement="Left">
-                                <MenuItem Header="Show dev tools" Click="DevToolsMenuItem_Click" />
+                                <MenuItem Header="About..." Click="AboutMenuItem_Click" />
+                                <Separator />
+                                <MenuItem Header="Show dev tools..." Click="DevToolsMenuItem_Click" />
                                 <Separator />
                                 <MenuItem Header="Close other tabs" Click="CloseOtherTabs_Click" />
                                 <Separator />

@@ -13,4 +13,7 @@
         <RefTargetDir>INSTALLFOLDER</RefTargetDir>
       </ProjectReference>
     </ItemGroup>
+    <PropertyGroup>
+        <DefineConstants>ProductVersion=$([System.IO.File]::ReadAllText('$(SolutionDir)ComfyUIClientWrapper\version.txt').Trim())</DefineConstants>
+    </PropertyGroup>
 </Project>

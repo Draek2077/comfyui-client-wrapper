@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,7 +11,7 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using Microsoft.Win32;
 using System.Windows.Shell;
-using System.IO;
+using System.Reflection;
 
 namespace ComfyUIClientWrapper
 {
@@ -373,6 +375,20 @@ namespace ComfyUIClientWrapper
             if (TabControl.SelectedItem is TabItem selectedTab &&
                 _tabContentMapping.TryGetValue(selectedTab, out var currentWebView))
                 currentWebView.Reload();
+        }
+
+        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Get the version from the executing assembly.
+            // The ?.ToString(3) part formats it to "Major.Minor.Build".
+            string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+
+            // 2. Create an instance of our new AboutWindow.
+            var aboutDialog = new AboutWindow(version);
+
+            // 3. Set the owner to this window and show it as a modal dialog.
+            aboutDialog.Owner = this;
+            aboutDialog.ShowDialog();
         }
         
         private void DevToolsMenuItem_Click(object sender, RoutedEventArgs e)

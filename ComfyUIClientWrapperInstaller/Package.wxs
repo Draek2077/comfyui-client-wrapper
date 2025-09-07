@@ -3,7 +3,7 @@
 
     <Package Name="ComfyUI Client Wrapper"
              Manufacturer="Draekz"
-             Version="1.0.0.0"
+             Version="$(var.ProductVersion)"
              UpgradeCode="08f8d139-35b0-48b8-bd51-ddb511922375">
 
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
