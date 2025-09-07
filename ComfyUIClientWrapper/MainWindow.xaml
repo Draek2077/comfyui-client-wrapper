@@ -4,42 +4,46 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="ComfyUI Client" Height="800" Width="1280"
+        Title="ComfyUI" Height="800" Width="1280"
         Loaded="MainWindow_Loaded"
         KeyDown="Window_KeyDown"
         Background="{DynamicResource WindowBackgroundBrush}">
 
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="TaskBarItemInfo" ProgressState="None" />
+    </Window.TaskbarItemInfo>
+    
     <Window.Resources>
         <!-- Style for the small 'x' button on each tab header -->
         <Style TargetType="Button" x:Key="TabCloseButton">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Padding" Value="5, 5, 5, 7"/>
-            <Setter Property="Width" Value="15"/>
-            <Setter Property="Height" Value="15"/>
-            <Setter Property="Margin" Value="5,0,0,-2"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}"/>
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Padding" Value="5, 5, 5, 7" />
+            <Setter Property="Width" Value="15" />
+            <Setter Property="Height" Value="15" />
+            <Setter Property="Margin" Value="5,0,0,-2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" CornerRadius="10">
-                            <TextBlock Text="✕" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="✕" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-                    <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                    <Setter Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
-        
+
         <!-- Style for the main '+' and 'Settings' buttons -->
         <Style TargetType="Button" x:Key="TopBarButton">
             <Setter Property="Background" Value="Transparent" />
@@ -163,6 +167,8 @@
                         </Button.Content>
                         <Button.ContextMenu>
                             <ContextMenu Placement="Left">
+                                <MenuItem Header="Show dev tools" Click="DevToolsMenuItem_Click" />
+                                <Separator />
                                 <MenuItem Header="Close other tabs" Click="CloseOtherTabs_Click" />
                                 <Separator />
                                 <MenuItem Header="Theme">

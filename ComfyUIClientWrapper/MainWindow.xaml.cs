@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,6 +7,8 @@ using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using Microsoft.Win32;
+using System.Windows.Shell;
+using System.IO;
 
 namespace ComfyUIClientWrapper
 {
@@ -18,10 +17,10 @@ namespace ComfyUIClientWrapper
         private readonly Dictionary<TabItem, WebView2> _tabContentMapping = new();
 
         private readonly string[] _tabOrdinalNames =
-        {
+        [
             "Primary", "Secondary", "Tertiary", "Quaternary", "Quinary", "Senary", "Septenary", "Octonary", "Nonary",
             "Denary"
-        };
+        ];
 
         private bool _isFullscreen;
 
@@ -35,12 +34,27 @@ namespace ComfyUIClientWrapper
             LoadAndApplyTheme();
             TabControl.SelectionChanged += TabControl_SelectionChanged;
         }
+        
+        private string GetProgressStringFromTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title)) return string.Empty;
+
+            MatchCollection matches = Regex.Matches(title, @"\[(\d+)%\]");
+
+            if (matches.Count > 0)
+            {
+                // Return the last match, formatted as "[XX%]"
+                return matches.Last().Value;
+            }
+
+            return string.Empty;
+        }
 
         private void ToggleFullscreen()
         {
             if (!_isFullscreen)
             {
-                // Store current state and enter fullscreen
+                // Store the current state and enter fullscreen
                 _storedWindowState = WindowState;
                 _storedWindowStyle = WindowStyle;
 
@@ -57,7 +71,7 @@ namespace ComfyUIClientWrapper
             }
             else
             {
-                // Restore previous state and exit fullscreen
+                // Restore the previous state and exit fullscreen
                 WindowState = _storedWindowState;
                 WindowStyle = _storedWindowStyle;
                 
@@ -66,11 +80,6 @@ namespace ComfyUIClientWrapper
         }
 
         private void FullscreenButton_Click(object sender, RoutedEventArgs e)
-        {
-            ToggleFullscreen();
-        }
-
-        private void ExitFullscreenButton_Click(object sender, RoutedEventArgs e)
         {
             ToggleFullscreen();
         }
@@ -133,12 +142,19 @@ namespace ComfyUIClientWrapper
         private void UpdateTabHeaders()
         {
             for (var i = 0; i < TabControl.Items.Count; i++)
+            {
                 if (TabControl.Items[i] is TabItem tab)
                 {
                     var tabName = i < _tabOrdinalNames.Length ? _tabOrdinalNames[i] : $"Tab {i + 1}";
                     if (tab.Header is StackPanel headerPanel && headerPanel.Children[0] is TextBlock textBlock)
+                    {
+                        // Store the base name in the Tag property for later use
+                        tab.Tag = tabName;
+                        // The text is now updated dynamically by the WebView2 event, so we just set the base name here.
                         textBlock.Text = tabName;
+                    }
                 }
+            }
         }
 
         private void UpdateRefreshButtonVisibility()
@@ -148,76 +164,128 @@ namespace ComfyUIClientWrapper
 
         private async void AddNewTab()
         {
+            var newTab = new TabItem();
+            var webView = new WebView2();
+
+            var wpfColor = (Color)Application.Current.Resources["WebViewBackgroundColor"];
+            webView.DefaultBackgroundColor = System.Drawing.Color.FromArgb(wpfColor.A, wpfColor.R, wpfColor.G, wpfColor.B);
+
+            _tabContentMapping[newTab] = webView;
+
+            var headerPanel = new StackPanel { Orientation = Orientation.Horizontal };
+            headerPanel.Children.Add(new TextBlock { Text = "", VerticalAlignment = VerticalAlignment.Center });
+
+            var closeButton = new Button { Style = (Style)FindResource("TabCloseButton"), Tag = newTab };
+            closeButton.Click += CloseButton_Click;
+            headerPanel.Children.Add(closeButton);
+
+            newTab.Header = headerPanel;
+
+            webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
+
+            TabControl.Items.Add(newTab);
+            UpdateTabHeaders();
+
+            TabControl.SelectedItem = newTab;
+
             try
             {
-                var newTab = new TabItem();
-                var webView = new WebView2();
+                // Define a user-writable path in AppData for WebView2's user data.
+                var userDataFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Draekz\\ComfyUI Client Wrapper");
 
-                var wpfColor = (Color)Application.Current.Resources["WebViewBackgroundColor"];
-                webView.DefaultBackgroundColor = System.Drawing.Color.FromArgb(wpfColor.A, wpfColor.R, wpfColor.G, wpfColor.B);
+                // Create the environment and initialize the WebView2 control.
+                var environment = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
+                await webView.EnsureCoreWebView2Async(environment);
 
-                _tabContentMapping[newTab] = webView;
-
-                var headerPanel = new StackPanel { Orientation = Orientation.Horizontal };
-                headerPanel.Children.Add(new TextBlock { Text = "", VerticalAlignment = VerticalAlignment.Center });
-
-                var closeButton = new Button { Style = (Style)FindResource("TabCloseButton"), Tag = newTab };
-                closeButton.Click += CloseButton_Click;
-                headerPanel.Children.Add(closeButton);
-
-                newTab.Header = headerPanel;
-
-                webView.CoreWebView2InitializationCompleted += WebView_CoreWebView2InitializationCompleted;
-
-                TabControl.Items.Add(newTab);
-                UpdateTabHeaders();
-
-                TabControl.SelectedItem = newTab;
-
-                try
+                // Subscribe to title changes after WebView2 is ready.
+                webView.CoreWebView2.DocumentTitleChanged += (_, _) =>
                 {
-                    // Define a user-writable path in AppData for WebView2's user data.
-                    string userDataFolder = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        "Draekz\\ComfyUI Client Wrapper");
-
-                    // Create the environment and initialize the WebView2 control.
-                    var environment = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
-                    await webView.EnsureCoreWebView2Async(environment);
-
-                    // Set the source AFTER initialization is successful.
-                    webView.Source = new Uri("http://127.0.0.1:8188/");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        $"WebView2 core initialization failed. Please ensure the WebView2 Runtime is installed. Error: {ex.Message}",
-                        "Core Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            
+                    var title = webView.CoreWebView2.DocumentTitle;
+                    var progressString = GetProgressStringFromTitle(title);
+                    
+                    // Only update the taskbar if the change happened in the currently visible WebView2
+                    if (!ReferenceEquals(MainContentPresenter.Content, webView))
+                        return;
+                    
+                    this.Title = $"ComfyUI {progressString}".Trim();
+                    UpdateTaskbarProgressFromTitle(webView.CoreWebView2.DocumentTitle);
+                };
+                    
+                // Set the source AFTER initialization is successful.
                 webView.Source = new Uri("http://127.0.0.1:8188/");
-
-                UpdateRefreshButtonVisibility();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show(
+                    $"WebView2 core initialization failed. Please ensure the WebView2 Runtime is installed. Error: {ex.Message}",
+                    "Core Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            
+            webView.Source = new Uri("http://127.0.0.1:8188/");
+
+            UpdateRefreshButtonVisibility();
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.Source is TabControl && TabControl.SelectedItem != null)
             {
-                if (_tabContentMapping.TryGetValue(TabControl.SelectedItem as TabItem ?? throw new InvalidOperationException(), out var webViewToShow))
+                if (_tabContentMapping.TryGetValue(
+                        TabControl.SelectedItem as TabItem ?? throw new InvalidOperationException(),
+                        out var webViewToShow))
+                {
                     MainContentPresenter.Content = webViewToShow;
+
+                    var title = webViewToShow.CoreWebView2?.DocumentTitle ?? string.Empty;
+                    var progressString = GetProgressStringFromTitle(title);
+                    this.Title = $"ComfyUI {progressString}".Trim();
+                    UpdateTaskbarProgressFromTitle(webViewToShow.CoreWebView2?.DocumentTitle ?? string.Empty);
+                }
             }
             else
             {
                 MainContentPresenter.Content = null;
+                this.Title = "ComfyUI";
+                UpdateTaskbarProgressFromTitle(string.Empty);
+
             }
         }
 
+        private void UpdateTaskbarProgressFromTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+            {
+                TaskBarItemInfo.ProgressState = TaskbarItemProgressState.None;
+                return;
+            }
+
+            // Use Regex.Matches to find ALL occurrences of "[percentage]" in the title.
+            // The regex looks for a literal '[', captures one or more digits, then a '%' and a ']'.
+            var matches = Regex.Matches(title, @"\[(\d+)%\]");
+
+            if (matches.Count > 0)
+            {
+                // Get the very last match from the collection.
+                // This prioritizes the subtask (e.g., [10%]) if it exists.
+                var lastMatch = matches.Last();
+        
+                // The captured digits are in Group 1.
+                if (!int.TryParse(lastMatch.Groups[1].Value, out var percentage))
+                    return;
+                
+                // Update the taskbar progress with the prioritized percentage
+                TaskBarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
+                TaskBarItemInfo.ProgressValue = percentage / 100.0;
+            }
+            else
+            {
+                // If no percentage is found in the title, reset the taskbar progress.
+                TaskBarItemInfo.ProgressState = TaskbarItemProgressState.None;
+            }
+        }
+        
         private void WebView_CoreWebView2InitializationCompleted(object? sender,
             CoreWebView2InitializationCompletedEventArgs e)
         {
@@ -229,14 +297,14 @@ namespace ComfyUIClientWrapper
 
         private void UpdateThemeCheckmarks()
         {
-            if (settingsButton.ContextMenu.Items.OfType<MenuItem>().FirstOrDefault(m => m.Header.ToString() == "Theme") is not MenuItem themeParentMenu)
+            if (settingsButton.ContextMenu?.Items.OfType<MenuItem>().FirstOrDefault(m => m.Header.ToString() == "Theme") is not { } themeParentMenu)
             {
                 return;
             }
             
             foreach (var item in themeParentMenu.Items)
             {
-                if (item is MenuItem themeItem && themeItem.Tag is string themeTag)
+                if (item is MenuItem { Tag: string themeTag } themeItem)
                 {
                     themeItem.IsChecked = (themeTag == _settings.Theme);
                 }
@@ -314,13 +382,23 @@ namespace ComfyUIClientWrapper
         {
             if (TabControl.SelectedItem is TabItem selectedTab &&
                 _tabContentMapping.TryGetValue(selectedTab, out var currentWebView))
-                currentWebView?.Reload();
+                currentWebView.Reload();
         }
-
+        
+        private void DevToolsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (TabControl.SelectedItem is TabItem selectedTab &&
+                _tabContentMapping.TryGetValue(selectedTab, out var currentWebView))
+            {
+                // This command opens the DevTools window for the selected tab's WebView2 instance
+                currentWebView.CoreWebView2?.OpenDevToolsWindow();
+            }
+        }
+        
         private void CloseOtherTabs_Click(object sender, RoutedEventArgs e)
         {
-            var selectedTab = TabControl.SelectedItem as TabItem;
-            if (selectedTab == null) return;
+            if (TabControl.SelectedItem is not TabItem selectedTab)
+                return;
 
             var tabsToRemove = _tabContentMapping.Keys.Where(tab => tab != selectedTab).ToList();
 
