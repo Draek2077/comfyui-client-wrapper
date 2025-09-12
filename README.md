@@ -22,3 +22,11 @@ https://github.com/Draek2077/comfyui-ultimate-installer
 If you are interested in ComfyUI, please visit:
 
 https://github.com/comfyanonymous/ComfyUI
+
+## Support This Project
+
+If you find this project helpful, consider supporting me with a coffee!
+
+<a href="https://buymeacoffee.com/draekzs">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
+</a>
